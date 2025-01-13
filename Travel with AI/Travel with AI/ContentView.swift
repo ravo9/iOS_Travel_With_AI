@@ -16,12 +16,23 @@ struct MainScreenView: View {
             VStack {
                 ScreenTitle()
                 ImageCarousel(viewModel: viewModel)
-                ActionButton(
-                    text: "Let's start, tell me where I am",
-                    onClick: {
-                        Task { await viewModel.sendPrompt(messageType: .initial) }
-                    }
-                )
+                ActionRow(buttons: [
+                    ("Let's start, tell me where I am", { Task { await viewModel.sendPrompt(messageType: .initial) } }, Color.green)
+                ])
+                ActionRow(buttons: [
+                    ("History of this place", { Task { await viewModel.sendPrompt(messageType: .history) } }, Color.green),
+                    ("Restaurants nearby", { Task { await viewModel.sendPrompt(messageType: .restaurants) } }, Color.green)
+                ])
+                ActionRow(buttons: [
+                    ("What attractions are worth-to-visit nearby", { Task { await viewModel.sendPrompt(messageType: .touristSpots) } }, Color.green)
+                ])
+                ActionRow(buttons: [
+                    ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, Color.red)
+                ])
+                ActionRow(buttons: [
+                    ("Take a picture - I will tell you what it is!", { Task { await viewModel.sendPrompt(messageType: .photo) } }, Color.blue)
+                ])
+                PromptInput(mainViewModel: viewModel)
                 Spacer()
                 OutputSection(outputText: viewModel.outputText)
             }
@@ -77,6 +88,8 @@ struct ActionButton: View {
     var onClick: () -> Void
     var buttonColor: Color = Color.green // adjust
     var isEnabled: Bool = true
+    var maxWidth: CGFloat = .infinity
+
     var body: some View {
         Button(action: {
             onClick()
@@ -85,13 +98,60 @@ struct ActionButton: View {
                 .font(.system(size: 16))
                 .bold()
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity, minHeight: 54)
-                .background(buttonColor)
-                .cornerRadius(30) // extract
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
+                .frame(maxWidth: maxWidth, minHeight: 54)
+                .padding(.horizontal, 20)
         }
         .disabled(!isEnabled)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 2)
+        .background(buttonColor)
+        .cornerRadius(50) // extract
+    }
+}
+
+struct ActionRow: View {
+    var buttons: [(text: String, action: () -> Void, buttonColor: Color)]
+
+    var body: some View {
+        HStack(spacing: 5) {
+            ForEach(buttons, id: \.text) { button in
+                ActionButton(
+                    text: button.text,
+                    onClick: button.action,
+                    buttonColor: button.buttonColor
+                )
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 2)
+    }
+}
+
+struct PromptInput: View {
+    @State private var prompt: String = ""
+    var mainViewModel: MainViewModel
+    
+    var body: some View {
+        HStack {
+            TextField("Enter your prompt...", text: $prompt)
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+                .padding(.leading, 16)
+                .frame(maxHeight: 100)
+
+            ActionButton(
+                text: "Go",
+                onClick: {
+                    Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                },
+                isEnabled: !prompt.isEmpty,
+                maxWidth: 40.0
+            )
+            .padding(.trailing, 16)
+        }
+        .padding(.top, 10)
     }
 }
 
