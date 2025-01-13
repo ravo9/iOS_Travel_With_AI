@@ -12,10 +12,23 @@ import CoreLocation
 
 @MainActor
 class MainViewModel: ObservableObject {
-    @Published var uiState: UiState = .initial
 //    private var locationManager = LocationManager()
     private var imagesRepository = ImagesRepository()
-//    private var generativeModel = GenerativeModelRepository()
+    private var generativeModel = GenerativeModelRepository(apiKey: "")
+    
+    @Published var uiState: UiState = .initial
+    var outputText: String {
+            switch uiState {
+            case .initial:
+                return "(My answers will appear here)"
+            case .loading:
+                return "Loading..."
+            case .success(let result):
+                return result
+            case .error(let errorMessage):
+                return "Error: \(errorMessage)"
+            }
+        }
     
     init() {
         fetchApiKey()
@@ -40,13 +53,15 @@ class MainViewModel: ObservableObject {
         uiState = .loading
         do {
 //            let location = try await locationManager.getCurrentLocation()
-//            guard let enhancedPrompt = enhancePrompt(messageType: messageType, location: location, prompt: prompt) else {
-//                uiState = .error("Prompt error.")
-//                return
-//            }
+            let location = CLLocation()
+            guard let enhancedPrompt = enhancePrompt(messageType: messageType, location: location, prompt: prompt) else {
+                uiState = .error("Prompt error.")
+                return
+            }
             
 //            let response = try await generativeModel.generateResponse(for: enhancedPrompt, photo: photo)
-//            uiState = .success(cleanResponseText(response))
+            let response = "Testing Viewmodel"
+            uiState = .success(cleanResponseText(response))
         } catch {
             uiState = .error(error.localizedDescription)
         }
@@ -56,9 +71,9 @@ class MainViewModel: ObservableObject {
         return text.replacingOccurrences(of: "**", with: "")
     }
 
-//    private func enhancePrompt(messageType: MessageType, location: CLLocation, prompt: String?) -> String? {
-//        return messageType.getMessage(location: location, prompt: prompt)
-//    }
+    private func enhancePrompt(messageType: MessageType, location: CLLocation, prompt: String?) -> String? {
+        return messageType.getMessage(location: location, prompt: prompt ?? "")
+    }
 }
 
 enum UiState {
