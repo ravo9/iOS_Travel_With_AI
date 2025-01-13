@@ -13,6 +13,7 @@ import CoreLocation
 @MainActor
 class MainViewModel: ObservableObject {
 //    private var locationManager = LocationManager()
+    private var remoteConfigRepository = RemoteConfigRepository()
     private var imagesRepository = ImagesRepository()
     private var generativeModel = GenerativeModelRepository(apiKey: "")
     
@@ -35,14 +36,14 @@ class MainViewModel: ObservableObject {
     }
 
     func fetchApiKey() {
-//        generativeModel.fetchApiKey(
-//            onSuccess: { [weak self] apiKey in
-//                self?.generativeModel.initializeModel(with: apiKey)
-//            },
-//            onError: { [weak self] in
-//                self?.uiState = .error("Problem with the server.")
-//            }
-//        )
+        remoteConfigRepository.fetchApiKey(
+            onSuccess: { [weak self] apiKey in
+                self?.generativeModel.initializeModel(apiKey: apiKey)
+            },
+            onError: { [weak self] error in
+                self?.uiState = .error("Problem with the server.")
+            }
+        )
     }
 
     func getAIGeneratedImages() -> [String] {
@@ -60,8 +61,8 @@ class MainViewModel: ObservableObject {
             }
             
 //            let response = try await generativeModel.generateResponse(for: enhancedPrompt, photo: photo)
-            let response = "Testing Viewmodel"
-            uiState = .success(cleanResponseText(response))
+            let response = try await generativeModel.generateResponse(prompt: enhancedPrompt)
+            uiState = .success(cleanResponseText(response ?? "Error empty response")) // fix
         } catch {
             uiState = .error(error.localizedDescription)
         }

@@ -12,20 +12,22 @@ struct MainScreenView: View {
     @State private var outputText: String = "(My answers will appear here)"
 
     var body: some View {
-        VStack {
-            ScreenTitle()
-            ImageCarousel(viewModel: viewModel)
-            ActionButton(
-                text: "Let's start, tell me where I am",
-                onClick: {
-                    Task { await viewModel.sendPrompt(messageType: .initial) }
-                }
-            )
-            Spacer()
-            OutputSection(outputText: viewModel.outputText)
+        ScrollView {
+            VStack {
+                ScreenTitle()
+                ImageCarousel(viewModel: viewModel)
+                ActionButton(
+                    text: "Let's start, tell me where I am",
+                    onClick: {
+                        Task { await viewModel.sendPrompt(messageType: .initial) }
+                    }
+                )
+                Spacer()
+                OutputSection(outputText: viewModel.outputText)
+            }
+            .background(Color.white)
+            .edgesIgnoringSafeArea(.top)
         }
-        .background(Color.white)
-        .edgesIgnoringSafeArea(.top)
     }
 }
 
@@ -35,7 +37,7 @@ struct ScreenTitle: View {
             .font(.system(size: 20, weight: .regular, design: .default))
             .kerning(0.5)
             .lineSpacing(8)
-            .padding(.top, 60)
+            .padding(.top, 10)
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, alignment: .center)
             .textCase(.uppercase)

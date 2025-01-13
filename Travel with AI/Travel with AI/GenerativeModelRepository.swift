@@ -24,17 +24,13 @@ class GenerativeModelRepository {
     
     func initializeModel(apiKey: String) {
         self.apiKey = apiKey
-        // Optionally perform any setup or validation if needed
     }
     
     func generateResponse(prompt: String) async throws -> String? {
-        // Update with the correct Gemini API endpoint
-        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent")!
-        
+        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=\(apiKey)")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") // Use your Google API key
 
         // Construct the payload matching the Gemini API requirements
         let payload: [String: Any] = [
@@ -63,18 +59,24 @@ class GenerativeModelRepository {
         
         // Decode the response
         let decodedResponse = try JSONDecoder().decode(GoogleGeminiResponse.self, from: data)
-        
+
         // Extract the generated text
-        return decodedResponse.contents?.first?.parts?.first?.text
+        return decodedResponse.candidates?.first?.content?.parts?.first?.text
     }
 }
 
-struct GoogleGeminiResponse: Decodable {
-    struct Content: Decodable {
-        struct Part: Decodable {
-            let text: String
-        }
-        let parts: [Part]?
-    }
-    let contents: [Content]?
+struct GoogleGeminiResponse: Codable {
+    let candidates: [Candidate]?
+}
+
+struct Candidate: Codable {
+    let content: Content?
+}
+
+struct Content: Codable {
+    let parts: [Part]?
+}
+
+struct Part: Codable {
+    let text: String
 }
