@@ -7,13 +7,16 @@
 
 import SwiftUI
 
+let blue500 = Color(red: 0x21/255.0, green: 0x96/255.0, blue: 0xF3/255.0)
+let firebrickRed = Color(red: 0xDB/255.0, green: 0x57/255.0, blue: 0x57/255.0)
+
 struct MainScreenView: View {
     @StateObject private var viewModel = MainViewModel()
     @State private var outputText: String = "(My answers will appear here)"
 
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(spacing: 8) {
                 ScreenTitle()
                 ImageCarousel(viewModel: viewModel)
                 ActionRow(buttons: [
@@ -27,13 +30,12 @@ struct MainScreenView: View {
                     ("What attractions are worth-to-visit nearby", { Task { await viewModel.sendPrompt(messageType: .touristSpots) } }, Color.green)
                 ])
                 ActionRow(buttons: [
-                    ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, Color.red)
+                    ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, firebrickRed)
                 ])
                 ActionRow(buttons: [
-                    ("Take a picture - I will tell you what it is!", { Task { await viewModel.sendPrompt(messageType: .photo) } }, Color.blue)
+                    ("Take a picture - I will tell you what it is!", { Task { await viewModel.sendPrompt(messageType: .photo) } }, blue500)
                 ])
                 PromptInput(mainViewModel: viewModel)
-                Spacer()
                 OutputSection(outputText: viewModel.outputText)
             }
             .background(Color.white)
@@ -134,12 +136,15 @@ struct PromptInput: View {
     
     var body: some View {
         HStack {
-            TextField("Enter your prompt...", text: $prompt)
+            TextField("Feel free to ask me more!", text: $prompt)
                 .padding()
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(12)
-                .padding(.leading, 16)
-                .frame(maxHeight: 100)
+                .font(.system(size: 18))
+                .padding(.leading, 18)
+                .frame(minHeight: 60)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
 
             ActionButton(
                 text: "Go",
@@ -160,7 +165,7 @@ struct OutputSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text(outputText)
-                .font(.system(size: 16))
+                .font(.system(size: 18))
                 .foregroundColor(.black)
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
