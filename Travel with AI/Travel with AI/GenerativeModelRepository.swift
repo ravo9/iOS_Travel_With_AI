@@ -14,13 +14,7 @@ struct ModelNames {
 }
 
 class GenerativeModelRepository {
-    private var apiKey: String
-    private var modelName: String
-    
-    init(apiKey: String, modelName: String = ModelNames.gemini20FlashExp) {
-        self.apiKey = apiKey
-        self.modelName = modelName
-    }
+    private var apiKey: String = ""
     
     func initializeModel(apiKey: String) {
         self.apiKey = apiKey

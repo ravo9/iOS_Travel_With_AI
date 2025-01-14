@@ -10,9 +10,11 @@ import Firebase
 
 @main
 struct Travel_with_AIApp: App {
+
     init() {
         FirebaseApp.configure()
     }
+
     var body: some Scene {
         WindowGroup {
             MainScreenView()

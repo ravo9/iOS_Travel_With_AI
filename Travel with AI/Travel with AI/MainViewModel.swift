@@ -12,10 +12,10 @@ import CoreLocation
 
 @MainActor
 class MainViewModel: ObservableObject {
-//    private var locationManager = LocationManager()
+    private var locationRepository = LocationRepository()
     private var remoteConfigRepository = RemoteConfigRepository()
     private var imagesRepository = ImagesRepository()
-    private var generativeModel = GenerativeModelRepository(apiKey: "")
+    private var generativeModel = GenerativeModelRepository()
     
     @Published var uiState: UiState = .initial
     var outputText: String {
@@ -41,7 +41,7 @@ class MainViewModel: ObservableObject {
                 self?.generativeModel.initializeModel(apiKey: apiKey)
             },
             onError: { [weak self] error in
-                self?.uiState = .error("Problem with the server.")
+                self?.uiState = .error("Problem with the server: " + error.localizedDescription)
             }
         )
     }
@@ -49,25 +49,97 @@ class MainViewModel: ObservableObject {
     func getAIGeneratedImages() -> [String] {
         return imagesRepository.getAIGeneratedImages()
     }
-
+    
     func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: UIImage? = nil) async {
         uiState = .loading
         do {
-//            let location = try await locationManager.getCurrentLocation()
-            let location = CLLocation()
-            guard let enhancedPrompt = enhancePrompt(messageType: messageType, location: location, prompt: prompt) else {
-                uiState = .error("Prompt error.")
+            guard try await checkAndRequestLocationPermission() else {
+                uiState = .error("Location permission denied.")
                 return
             }
             
-//            let response = try await generativeModel.generateResponse(for: enhancedPrompt, photo: photo)
-            let response = try await generativeModel.generateResponse(prompt: enhancedPrompt)
-            uiState = .success(cleanResponseText(response ?? "Error empty response")) // fix
+            guard let location = try await fetchCurrentLocation() else {
+                uiState = .error("Location not available")
+                return
+            }
+            guard let enhancedPrompt = enhancePrompt(messageType: messageType, location: location, prompt: prompt) else {
+                uiState = .error("Failed to enhance the prompt.")
+                return
+            }
+            guard let response = try await generateResponse(for: enhancedPrompt) else {
+                uiState = .error("Received empty response.")
+                return
+            }
+            uiState = .success(cleanResponseText(response))
         } catch {
             uiState = .error(error.localizedDescription)
         }
     }
-    
+
+    private func checkAndRequestLocationPermission() async throws -> Bool {
+        let locationManager = CLLocationManager()
+        let status = CLLocationManager.authorizationStatus()
+
+        switch status {
+        case .authorizedWhenInUse, .authorizedAlways:
+            return true
+        case .notDetermined:
+            return try await withCheckedThrowingContinuation { continuation in
+                locationManager.requestWhenInUseAuthorization()
+                locationManager.delegate = PermissionDelegate { granted in
+                    if granted {
+                        continuation.resume(returning: true)
+                    } else {
+                        continuation.resume(returning: false)
+                    }
+                }
+            }
+        case .denied, .restricted:
+            return false // Permission denied or restricted
+        @unknown default:
+            throw NSError(domain: "Unknown authorization status", code: -1, userInfo: nil)
+        }
+    }
+
+    class PermissionDelegate: NSObject, CLLocationManagerDelegate {
+        private let completion: (Bool) -> Void
+
+        init(completion: @escaping (Bool) -> Void) {
+            self.completion = completion
+        }
+
+        func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+            let status = CLLocationManager.authorizationStatus()
+            switch status {
+            case .authorizedWhenInUse, .authorizedAlways:
+                completion(true)
+            case .denied, .restricted, .notDetermined:
+                completion(false)
+            @unknown default:
+                completion(false)
+            }
+        }
+    }
+
+    private func fetchCurrentLocation() async throws -> CLLocation? {
+        do {
+            if let location = try await locationRepository.getCurrentLocation() {
+                return CLLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+            }
+            return nil
+        } catch {
+            return nil
+        }
+    }
+
+    private func generateResponse(for prompt: String) async throws -> String? {
+        do {
+            return try await generativeModel.generateResponse(prompt: prompt)
+        } catch {
+            throw error
+        }
+    }
+
     private func cleanResponseText(_ text: String) -> String {
         return text.replacingOccurrences(of: "**", with: "")
     }

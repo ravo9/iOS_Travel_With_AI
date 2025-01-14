@@ -14,8 +14,12 @@ class RemoteConfigRepository {
 
     init() {
         self.remoteConfig = RemoteConfig.remoteConfig()
+        configureRemoteConfig()
+    }
+    
+    private func configureRemoteConfig() {
         let settings = RemoteConfigSettings()
-        settings.minimumFetchInterval = 3600
+        settings.minimumFetchInterval = 20
         self.remoteConfig.configSettings = settings
     }
 
