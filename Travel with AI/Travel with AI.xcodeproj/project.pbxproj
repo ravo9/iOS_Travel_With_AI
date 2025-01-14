@@ -65,12 +65,12 @@
 		998906922D33F54800E0A4B4 /* Travel with AI */ = {
 			isa = PBXGroup;
 			children = (
-				998906BF2D354D5500E0A4B4 /* LocationRepository.swift */,
 				998906932D33F54800E0A4B4 /* Travel_with_AIApp.swift */,
-				998906A32D34033A00E0A4B4 /* ImagesRepository.swift */,
 				998906952D33F54800E0A4B4 /* ContentView.swift */,
 				998906A12D33F66D00E0A4B4 /* MainViewModel.swift */,
+				998906A32D34033A00E0A4B4 /* ImagesRepository.swift */,
 				998906AF2D34F10B00E0A4B4 /* RemoteConfigRepository.swift */,
+				998906BF2D354D5500E0A4B4 /* LocationRepository.swift */,
 				998906AD2D34DC1E00E0A4B4 /* GenerativeModelRepository.swift */,
 				998906972D33F54900E0A4B4 /* Assets.xcassets */,
 				998906BD2D350FFF00E0A4B4 /* GoogleService-Info.plist */,
