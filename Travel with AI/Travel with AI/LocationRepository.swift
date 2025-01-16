@@ -28,6 +28,7 @@ class LocationRepository: NSObject, CLLocationManagerDelegate {
         locationContinuation = nil
     }
 
+    // Todo: Throw the printed errors.
     // CLLocationManagerDelegate method - called when an error occurs
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let clError = error as? CLError {

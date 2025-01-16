@@ -32,6 +32,7 @@ struct MainScreenView: View {
                 ActionRow(buttons: [
                     ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, firebrickRed)
                 ])
+                // Todo: To be implemented (photo)
                 ActionRow(buttons: [
                     ("Take a picture - I will tell you what it is!", { Task { await viewModel.sendPrompt(messageType: .photo) } }, blue500)
                 ])
@@ -91,7 +92,6 @@ struct ActionButton: View {
     var buttonColor: Color = Color.green // adjust
     var isEnabled: Bool = true
     var maxWidth: CGFloat = .infinity
-
     var body: some View {
         Button(action: {
             onClick()
@@ -113,7 +113,6 @@ struct ActionButton: View {
 
 struct ActionRow: View {
     var buttons: [(text: String, action: () -> Void, buttonColor: Color)]
-
     var body: some View {
         HStack(spacing: 5) {
             ForEach(buttons, id: \.text) { button in

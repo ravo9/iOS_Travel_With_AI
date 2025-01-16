@@ -26,15 +26,18 @@ class RemoteConfigRepository {
     func fetchApiKey(onSuccess: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
         remoteConfig.fetchAndActivate { status, error in
             if let error = error {
-                onError(error) // Handle error case
+                onError(error)
                 return
             }
-            
             if status == .successFetchedFromRemote || status == .successUsingPreFetchedData {
-                let apiKey = self.remoteConfig["api_key"].stringValue ?? ""
-                onSuccess(apiKey) // Return the fetched API key
+                let apiKey = self.remoteConfig["api_key"].stringValue
+                if !apiKey.isEmpty {
+                    onSuccess(apiKey)
+                } else {
+                    onError(NSError(domain: "RemoteConfigError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fetch failed (received API key is null or empty)."]))
+                }
             } else {
-                onError(NSError(domain: "RemoteConfigError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fetch failed."]))
+                onError(NSError(domain: "RemoteConfigError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fetch failed (returned status is not right)."]))
             }
         }
     }

@@ -26,7 +26,6 @@ class GenerativeModelRepository {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Construct the payload matching the Gemini API requirements
         let payload: [String: Any] = [
             "contents": [
                 [
@@ -36,15 +35,12 @@ class GenerativeModelRepository {
                 ]
             ]
         ]
-        
-        // Serialize the payload to JSON
+
         let jsonPayload = try JSONSerialization.data(withJSONObject: payload, options: [])
         request.httpBody = jsonPayload
-        
-        // Perform the network request
+
         let (data, response) = try await URLSession.shared.data(for: request)
-        
-        // Check the HTTP response status
+
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
             return errorMessage // Probably wrong, my edit.

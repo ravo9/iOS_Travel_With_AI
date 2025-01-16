@@ -57,7 +57,6 @@ class MainViewModel: ObservableObject {
                 uiState = .error("Location permission denied.")
                 return
             }
-            
             guard let location = try await fetchCurrentLocation() else {
                 uiState = .error("Location not available")
                 return
