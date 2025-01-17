@@ -13,6 +13,8 @@ let firebrickRed = Color(red: 0xDB/255.0, green: 0x57/255.0, blue: 0x57/255.0)
 struct MainScreenView: View {
     @StateObject private var viewModel = MainViewModel()
     @State private var outputText: String = "(My answers will appear here)"
+    @State private var showCamera = false
+    @State private var capturedImageData: Data?
 
     var body: some View {
         ScrollView {
@@ -32,15 +34,40 @@ struct MainScreenView: View {
                 ActionRow(buttons: [
                     ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, firebrickRed)
                 ])
-                // Todo: To be implemented (photo)
+                if let imageData = capturedImageData {
+                    ImagePreview(imageData: imageData)
+                        .transition(.opacity)
+                }
                 ActionRow(buttons: [
-                    ("Take a picture - I will tell you what it is!", { Task { await viewModel.sendPrompt(messageType: .photo) } }, blue500)
+                    ("Take a picture - I will tell you what it is!", {
+                        showCamera = true
+                    }, blue500)
                 ])
                 PromptInput(mainViewModel: viewModel)
                 OutputSection(outputText: viewModel.outputText)
             }
             .background(Color.white)
             .edgesIgnoringSafeArea(.top)
+        }
+        .sheet(isPresented: $showCamera) {
+            CameraView(imageData: $capturedImageData)
+        }
+        .onChange(of: capturedImageData) { newValue in
+            handleImageChange(newValue)
+        }
+    }
+    
+    private func handleImageChange(_ newValue: Data?) {
+        if let imageData = newValue {
+            print("onChange detected capturedImageData, size: \(imageData.count) bytes")
+            Task {
+                await viewModel.sendPrompt(
+                    messageType: .photo,
+                    photo: imageData
+                )
+            }
+        } else {
+            print("onChange detected capturedImageData is nil")
         }
     }
 }
@@ -126,6 +153,78 @@ struct ActionRow: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 2)
+    }
+}
+
+struct ImagePreview: View {
+    var imageData: Data?
+
+    var body: some View {
+        VStack {
+            if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 200, height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(radius: 5)
+            } else {
+                Text("No Image Selected")
+                    .font(.system(size: 16))
+                    .foregroundColor(.gray)
+                    .frame(width: 200, height: 200)
+                    .background(Color.gray.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(radius: 5)
+            }
+        }
+        .padding()
+    }
+}
+
+struct CameraView: UIViewControllerRepresentable {
+    @Binding var imageData: Data?
+    @Environment(\.presentationMode) var presentationMode
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+//        picker.sourceType = .camera
+        picker.sourceType = .photoLibrary
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let parent: CameraView
+        init(_ parent: CameraView) {
+            self.parent = parent
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                let imageCompressed = image.jpegData(compressionQuality: 0.8)
+//                parent.imageData = imageCompressed
+                DispatchQueue.main.async {
+                    if let imageCompressed = imageCompressed {
+                        // Force state change
+                        self.parent.imageData = nil
+                        self.parent.imageData = imageCompressed
+                        print("ImagePickerController set image data, size: \(imageCompressed.count ?? 0) bytes") // Debugging line
+                    }
+                }
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
     }
 }
 

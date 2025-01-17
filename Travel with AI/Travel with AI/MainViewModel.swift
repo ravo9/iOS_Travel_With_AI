@@ -50,7 +50,7 @@ class MainViewModel: ObservableObject {
         return imagesRepository.getAIGeneratedImages()
     }
     
-    func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: UIImage? = nil) async {
+    func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: Data? = nil) async {
         uiState = .loading
         do {
             guard try await checkAndRequestLocationPermission() else {
@@ -65,7 +65,10 @@ class MainViewModel: ObservableObject {
                 uiState = .error("Failed to enhance the prompt.")
                 return
             }
-            guard let response = try await generateResponse(for: enhancedPrompt) else {
+            guard let response = try await generateResponse(
+                for: enhancedPrompt,
+                photo: photo
+            ) else {
                 uiState = .error("Received empty response.")
                 return
             }
@@ -131,9 +134,12 @@ class MainViewModel: ObservableObject {
         }
     }
 
-    private func generateResponse(for prompt: String) async throws -> String? {
+    private func generateResponse(for prompt: String, photo: Data?) async throws -> String? {
         do {
-            return try await generativeModel.generateResponse(prompt: prompt)
+            return try await generativeModel.generateResponse(
+                prompt: prompt,
+                imageData: photo
+            )
         } catch {
             throw error
         }

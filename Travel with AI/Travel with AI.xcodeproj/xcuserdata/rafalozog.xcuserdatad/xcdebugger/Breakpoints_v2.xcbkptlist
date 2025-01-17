@@ -30,10 +30,10 @@
             filePath = "Travel with AI/GenerativeModelRepository.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "42"
-            endingLineNumber = "42"
-            landmarkName = "generateResponse(prompt:)"
-            landmarkType = "7">
+            startingLineNumber = "80"
+            endingLineNumber = "80"
+            landmarkName = "GenerativeModelRepository"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -46,10 +46,10 @@
             filePath = "Travel with AI/GenerativeModelRepository.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "44"
-            endingLineNumber = "44"
-            landmarkName = "generateResponse(prompt:)"
-            landmarkType = "7">
+            startingLineNumber = "82"
+            endingLineNumber = "82"
+            landmarkName = "GenerativeModelRepository"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -62,10 +62,10 @@
             filePath = "Travel with AI/GenerativeModelRepository.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
-            landmarkName = "generateResponse(prompt:)"
-            landmarkType = "7">
+            startingLineNumber = "83"
+            endingLineNumber = "83"
+            landmarkName = "GenerativeModelRepository"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -78,10 +78,10 @@
             filePath = "Travel with AI/GenerativeModelRepository.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
-            landmarkName = "generateResponse(prompt:)"
-            landmarkType = "7">
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "GenerativeModelRepository"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -194,6 +194,50 @@
             endingLineNumber = "64"
             landmarkName = "sendPrompt(messageType:prompt:photo:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "E88C2CEC-0A6B-4FDE-A958-64773D49CE01 - e8fa92e259f47b73"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(5) suspend resume partial function for Travel_with_AI.MainViewModel.sendPrompt(messageType: Travel_with_AI.MessageType, prompt: Swift.Optional&lt;Swift.String&gt;, photo: Swift.Optional&lt;Foundation.Data&gt;) async -&gt; ()"
+                  moduleName = "Travel with AI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rafalozog/workspace/iOS_Travel_With_AI/Travel%20with%20AI/Travel%20with%20AI/MainViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "64"
+                  endingLineNumber = "64">
+               </Location>
+               <Location
+                  uuid = "E88C2CEC-0A6B-4FDE-A958-64773D49CE01 - cfac7e2013db0775"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(7) suspend resume partial function for Travel_with_AI.MainViewModel.sendPrompt(messageType: Travel_with_AI.MessageType, prompt: Swift.Optional&lt;Swift.String&gt;, photo: Swift.Optional&lt;Foundation.Data&gt;) async -&gt; ()"
+                  moduleName = "Travel with AI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rafalozog/workspace/iOS_Travel_With_AI/Travel%20with%20AI/Travel%20with%20AI/MainViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "64"
+                  endingLineNumber = "64">
+               </Location>
+               <Location
+                  uuid = "E88C2CEC-0A6B-4FDE-A958-64773D49CE01 - f056f8ec03f5365"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(10) suspend resume partial function for Travel_with_AI.MainViewModel.sendPrompt(messageType: Travel_with_AI.MessageType, prompt: Swift.Optional&lt;Swift.String&gt;, photo: Swift.Optional&lt;Foundation.Data&gt;) async -&gt; ()"
+                  moduleName = "Travel with AI"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rafalozog/workspace/iOS_Travel_With_AI/Travel%20with%20AI/Travel%20with%20AI/MainViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "64"
+                  endingLineNumber = "64">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -206,9 +250,9 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "135"
-            endingLineNumber = "135"
-            landmarkName = "generateResponse(for:)"
+            startingLineNumber = "138"
+            endingLineNumber = "138"
+            landmarkName = "generateResponse(for:photo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -222,9 +266,9 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "137"
-            endingLineNumber = "137"
-            landmarkName = "generateResponse(for:)"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
+            landmarkName = "generateResponse(for:photo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -238,9 +282,9 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "136"
-            endingLineNumber = "136"
-            landmarkName = "generateResponse(for:)"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
+            landmarkName = "generateResponse(for:photo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -254,9 +298,9 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "138"
-            endingLineNumber = "138"
-            landmarkName = "generateResponse(for:)"
+            startingLineNumber = "144"
+            endingLineNumber = "144"
+            landmarkName = "generateResponse(for:photo:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -270,8 +314,8 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "110"
-            endingLineNumber = "110"
+            startingLineNumber = "113"
+            endingLineNumber = "113"
             landmarkName = "locationManagerDidChangeAuthorization(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -286,8 +330,8 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "118"
-            endingLineNumber = "118"
+            startingLineNumber = "121"
+            endingLineNumber = "121"
             landmarkName = "locationManagerDidChangeAuthorization(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -302,8 +346,8 @@
             filePath = "Travel with AI/MainViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "114"
-            endingLineNumber = "114"
+            startingLineNumber = "117"
+            endingLineNumber = "117"
             landmarkName = "locationManagerDidChangeAuthorization(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -322,6 +366,38 @@
             endingLineNumber = "65"
             landmarkName = "sendPrompt(messageType:prompt:photo:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D555CC5F-56A5-43AA-867A-26179BB30498"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Travel with AI/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "211"
+            endingLineNumber = "211"
+            landmarkName = "updateUIViewController(_:context:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F3CD772C-E4BA-412C-9BCE-F7DEE42ECC1F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Travel with AI/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "210"
+            endingLineNumber = "210"
+            landmarkName = "CameraView"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
