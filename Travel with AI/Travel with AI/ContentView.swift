@@ -59,15 +59,7 @@ struct MainScreenView: View {
     
     private func handleImageChange(_ newValue: Data?) {
         if let imageData = newValue {
-            print("onChange detected capturedImageData, size: \(imageData.count) bytes")
-            Task {
-                await viewModel.sendPrompt(
-                    messageType: .photo,
-                    photo: imageData
-                )
-            }
-        } else {
-            print("onChange detected capturedImageData is nil")
+            Task { await viewModel.sendPrompt(messageType: .photo, photo: imageData) }
         }
     }
 }
@@ -188,8 +180,13 @@ struct CameraView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
-//        picker.sourceType = .camera
-        picker.sourceType = .photoLibrary
+        
+        #if targetEnvironment(simulator)
+            picker.sourceType = .photoLibrary
+        #else
+            picker.sourceType = .camera
+        #endif
+        
         picker.delegate = context.coordinator
         return picker
     }
@@ -209,13 +206,10 @@ struct CameraView: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.originalImage] as? UIImage {
                 let imageCompressed = image.jpegData(compressionQuality: 0.8)
-//                parent.imageData = imageCompressed
                 DispatchQueue.main.async {
                     if let imageCompressed = imageCompressed {
-                        // Force state change
                         self.parent.imageData = nil
                         self.parent.imageData = imageCompressed
-                        print("ImagePickerController set image data, size: \(imageCompressed.count ?? 0) bytes") // Debugging line
                     }
                 }
             }
