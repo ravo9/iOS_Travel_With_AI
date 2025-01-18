@@ -2,7 +2,6 @@ import Foundation
 import CoreLocation
 
 class LocationRepository: NSObject, CLLocationManagerDelegate {
-    
     private var locationManager: CLLocationManager
     private var locationContinuation: CheckedContinuation<CLLocation?, Error>?
 

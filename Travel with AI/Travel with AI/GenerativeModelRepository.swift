@@ -32,7 +32,7 @@ class GenerativeModelRepository {
             let base64Image = imageData.base64EncodedString()
             parts.append([
                 "inlineData": [
-                    "mimeType": "image/png",  // or "image/jpeg"
+                    "mimeType": "image/png",
                     "data": base64Image
                 ]
             ])
@@ -57,36 +57,6 @@ class GenerativeModelRepository {
         let decodedResponse = try JSONDecoder().decode(GoogleGeminiResponse.self, from: data)
         return decodedResponse.candidates?.first?.content?.parts?.first?.text
     }
-
-//    func generateResponse(prompt: String) async throws -> String? {
-//        let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=\(apiKey)")!
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//        let payload: [String: Any] = [
-//            "contents": [
-//                [
-//                    "parts": [
-//                        ["text": prompt]
-//                    ]
-//                ]
-//            ]
-//        ]
-//
-//        let jsonPayload = try JSONSerialization.data(withJSONObject: payload, options: [])
-//        request.httpBody = jsonPayload
-//
-//        let (data, response) = try await URLSession.shared.data(for: request)
-//
-//        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//            let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-//            return errorMessage // Probably wrong, my edit.
-////            throw NSError(domain: "GenerativeModelError", code: httpResponse?.statusCode ?? 0, userInfo: [NSLocalizedDescriptionKey: errorMessage])
-//        }
-//        let decodedResponse = try JSONDecoder().decode(GoogleGeminiResponse.self, from: data)
-//        return decodedResponse.candidates?.first?.content?.parts?.first?.text
-//    }
 }
 
 struct GoogleGeminiResponse: Codable {
