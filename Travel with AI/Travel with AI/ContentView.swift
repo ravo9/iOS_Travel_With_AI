@@ -294,11 +294,18 @@ struct PromptInput: View {
                 .frame(minHeight: 60)
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
+                .onSubmit {
+                    onClick?({
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                    })
+                }
 
             ActionButton(
                 text: "Go",
                 onClick: {
                     onClick?({
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
                     })
                 },
