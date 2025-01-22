@@ -71,7 +71,14 @@ struct MainScreenView: View {
                         })
                     }, blue500)
                 ])
-                PromptInput(mainViewModel: viewModel)
+                PromptInput(
+                    mainViewModel: viewModel,
+                    onClick: { action in
+                        requestPermission(for: .location, completion: {
+                            action()
+                        })
+                    }
+                )
                 OutputSection(viewModel: viewModel)
             }
             .background(Color.white)
@@ -275,6 +282,7 @@ struct CameraView: UIViewControllerRepresentable {
 struct PromptInput: View {
     @State private var prompt: String = ""
     var mainViewModel: MainViewModel
+    var onClick: ((@escaping () -> Void) -> Void)?
     var body: some View {
         HStack {
             TextField("Feel free to ask me more!", text: $prompt)
@@ -290,8 +298,9 @@ struct PromptInput: View {
             ActionButton(
                 text: "Go",
                 onClick: {
-                    // Todo: Mising permission
-                    Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                    onClick?({
+                        Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                    })
                 },
                 isEnabled: !prompt.isEmpty,
                 maxWidth: 40.0
