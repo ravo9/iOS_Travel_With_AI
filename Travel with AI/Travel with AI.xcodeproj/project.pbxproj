@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		99490FC92D40FC0F0030208E /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99490FC82D40FC0F0030208E /* PermissionManager.swift */; };
 		998906942D33F54800E0A4B4 /* Travel_with_AIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998906932D33F54800E0A4B4 /* Travel_with_AIApp.swift */; };
 		998906962D33F54800E0A4B4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998906952D33F54800E0A4B4 /* ContentView.swift */; };
 		998906982D33F54900E0A4B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 998906972D33F54900E0A4B4 /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		99490FC82D40FC0F0030208E /* PermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionManager.swift; sourceTree = "<group>"; };
 		998906902D33F54800E0A4B4 /* Travel with AI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Travel with AI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		998906932D33F54800E0A4B4 /* Travel_with_AIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Travel_with_AIApp.swift; sourceTree = "<group>"; };
 		998906952D33F54800E0A4B4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				998906AF2D34F10B00E0A4B4 /* RemoteConfigRepository.swift */,
 				998906BF2D354D5500E0A4B4 /* LocationRepository.swift */,
 				998906AD2D34DC1E00E0A4B4 /* GenerativeModelRepository.swift */,
+				99490FC82D40FC0F0030208E /* PermissionManager.swift */,
 				998906972D33F54900E0A4B4 /* Assets.xcassets */,
 				998906BD2D350FFF00E0A4B4 /* GoogleService-Info.plist */,
 				998906992D33F54900E0A4B4 /* Preview Content */,
@@ -165,6 +168,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				998906962D33F54800E0A4B4 /* ContentView.swift in Sources */,
+				99490FC92D40FC0F0030208E /* PermissionManager.swift in Sources */,
 				998906B02D34F10B00E0A4B4 /* RemoteConfigRepository.swift in Sources */,
 				998906C02D354D5500E0A4B4 /* LocationRepository.swift in Sources */,
 				998906942D33F54800E0A4B4 /* Travel_with_AIApp.swift in Sources */,
@@ -304,8 +308,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Travel with AI/Preview Content\"";
+				DEVELOPMENT_TEAM = G929JT6V44;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is required to allow the AI to view your surroundings and provide explanations based on what it sees.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized AI service.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -333,8 +339,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Travel with AI/Preview Content\"";
+				DEVELOPMENT_TEAM = G929JT6V44;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is required to allow the AI to view your surroundings and provide explanations based on what it sees.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized AI service.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

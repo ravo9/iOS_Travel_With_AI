@@ -36,9 +36,11 @@ class MainViewModel: ObservableObject {
     }
 
     func fetchApiKey() {
+        uiState = .loading
         remoteConfigRepository.fetchApiKey(
             onSuccess: { [weak self] apiKey in
                 self?.generativeModel.initializeModel(apiKey: apiKey)
+                self?.uiState = .initial
             },
             onError: { [weak self] error in
                 self?.uiState = .error("Problem with the server: " + error.localizedDescription)
@@ -53,10 +55,6 @@ class MainViewModel: ObservableObject {
     func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: Data? = nil) async {
         uiState = .loading
         do {
-            guard try await checkAndRequestLocationPermission() else {
-                uiState = .error("Location permission denied.")
-                return
-            }
             guard let location = try await fetchCurrentLocation() else {
                 uiState = .error("Location not available")
                 return
@@ -75,51 +73,6 @@ class MainViewModel: ObservableObject {
             uiState = .success(cleanResponseText(response))
         } catch {
             uiState = .error(error.localizedDescription)
-        }
-    }
-
-    private func checkAndRequestLocationPermission() async throws -> Bool {
-        let locationManager = CLLocationManager()
-        let status = CLLocationManager.authorizationStatus()
-
-        switch status {
-        case .authorizedWhenInUse, .authorizedAlways:
-            return true
-        case .notDetermined:
-            return try await withCheckedThrowingContinuation { continuation in
-                locationManager.requestWhenInUseAuthorization()
-                locationManager.delegate = PermissionDelegate { granted in
-                    if granted {
-                        continuation.resume(returning: true)
-                    } else {
-                        continuation.resume(returning: false)
-                    }
-                }
-            }
-        case .denied, .restricted:
-            return false // Permission denied or restricted
-        @unknown default:
-            throw NSError(domain: "Unknown authorization status", code: -1, userInfo: nil)
-        }
-    }
-
-    class PermissionDelegate: NSObject, CLLocationManagerDelegate {
-        private let completion: (Bool) -> Void
-
-        init(completion: @escaping (Bool) -> Void) {
-            self.completion = completion
-        }
-
-        func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-            let status = CLLocationManager.authorizationStatus()
-            switch status {
-            case .authorizedWhenInUse, .authorizedAlways:
-                completion(true)
-            case .denied, .restricted, .notDetermined:
-                completion(false)
-            @unknown default:
-                completion(false)
-            }
         }
     }
 

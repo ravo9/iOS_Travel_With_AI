@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 let blue500 = Color(red: 0x21/255.0, green: 0x96/255.0, blue: 0xF3/255.0)
 let firebrickRed = Color(red: 0xDB/255.0, green: 0x57/255.0, blue: 0x57/255.0)
@@ -15,6 +16,9 @@ struct MainScreenView: View {
     @State private var outputText: String = "(My answers will appear here)"
     @State private var showCamera = false
     @State private var capturedImageData: Data?
+    @State private var permissionErrorMessage: String?
+
+    private let permissionManager = PermissionManager()
 
     var body: some View {
         ScrollView {
@@ -22,17 +26,37 @@ struct MainScreenView: View {
                 ScreenTitle()
                 ImageCarousel(viewModel: viewModel)
                 ActionRow(buttons: [
-                    ("Let's start, tell me where I am", { Task { await viewModel.sendPrompt(messageType: .initial) } }, Color.green)
+                    ("Let's start, tell me where I am", {
+                        requestPermission(for: .location, completion: {
+                            Task { await viewModel.sendPrompt(messageType: .initial) }
+                        })
+                    }, Color.green)
                 ])
                 ActionRow(buttons: [
-                    ("History of this place", { Task { await viewModel.sendPrompt(messageType: .history) } }, Color.green),
-                    ("Restaurants nearby", { Task { await viewModel.sendPrompt(messageType: .restaurants) } }, Color.green)
+                    ("History of this place", {
+                        requestPermission(for: .location, completion: {
+                            Task { await viewModel.sendPrompt(messageType: .history) }
+                        })
+                    }, Color.green),
+                    ("Restaurants nearby", {
+                        requestPermission(for: .location, completion: {
+                            Task { await viewModel.sendPrompt(messageType: .restaurants) }
+                        })
+                    }, Color.green)
                 ])
                 ActionRow(buttons: [
-                    ("What attractions are worth-to-visit nearby", { Task { await viewModel.sendPrompt(messageType: .touristSpots) } }, Color.green)
+                    ("What attractions are worth-to-visit nearby", {
+                        requestPermission(for: .location, completion: {
+                            Task { await viewModel.sendPrompt(messageType: .touristSpots) }
+                        })
+                    }, Color.green)
                 ])
                 ActionRow(buttons: [
-                    ("What risks should I be aware of here?", { Task { await viewModel.sendPrompt(messageType: .safety) } }, firebrickRed)
+                    ("What risks should I be aware of here?", {
+                        requestPermission(for: .location, completion: {
+                            Task { await viewModel.sendPrompt(messageType: .safety) }
+                        })
+                    }, firebrickRed)
                 ])
                 if let imageData = capturedImageData {
                     ImagePreview(imageData: imageData)
@@ -40,11 +64,15 @@ struct MainScreenView: View {
                 }
                 ActionRow(buttons: [
                     ("Take a picture - I will tell you what it is!", {
-                        showCamera = true
+                        requestPermission(for: .location, completion: {
+                            requestPermission(for: .camera, completion: {
+                                showCamera = true
+                            })
+                        })
                     }, blue500)
                 ])
                 PromptInput(mainViewModel: viewModel)
-                OutputSection(outputText: viewModel.outputText)
+                OutputSection(viewModel: viewModel)
             }
             .background(Color.white)
             .edgesIgnoringSafeArea(.top)
@@ -55,8 +83,35 @@ struct MainScreenView: View {
         .onChange(of: capturedImageData) { newValue in
             handleImageChange(newValue)
         }
+        .alert(isPresented: Binding<Bool>(
+            get: { permissionErrorMessage != nil },
+            set: { if !$0 { permissionErrorMessage = nil } }
+        )) {
+            Alert(
+                title: Text("Permission Required"),
+                message: Text(permissionErrorMessage ?? ""),
+                primaryButton: .default(Text("Go to Settings")) {
+                    if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsURL)
+                    }
+                },
+                secondaryButton: .cancel {
+                    permissionErrorMessage = nil
+                }
+            )
+        }
     }
     
+    private func requestPermission(for type: PermissionType, completion: @escaping () -> Void) {
+        permissionManager.requestPermission(for: type) { granted in
+            if granted {
+                completion()
+            } else {
+                permissionErrorMessage = "Permission denied for \(type). Please enable it in Settings."
+            }
+        }
+    }
+
     private func handleImageChange(_ newValue: Data?) {
         if let imageData = newValue {
             Task { await viewModel.sendPrompt(messageType: .photo, photo: imageData) }
@@ -79,7 +134,6 @@ struct ScreenTitle: View {
 
 struct ImageCarousel: View {
     @ObservedObject var viewModel: MainViewModel
-    
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
@@ -89,7 +143,6 @@ struct ImageCarousel: View {
                             .fill(Color.white)
                             .shadow(radius: 5)
                             .frame(width: 130, height: 130)
-                        
                         Image(imageName)
                             .resizable()
                             .scaledToFill()
@@ -126,7 +179,7 @@ struct ActionButton: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 2)
         .background(buttonColor)
-        .cornerRadius(50) // extract
+        .cornerRadius(50)
     }
 }
 
@@ -150,7 +203,6 @@ struct ActionRow: View {
 
 struct ImagePreview: View {
     var imageData: Data?
-
     var body: some View {
         VStack {
             if let imageData = imageData, let uiImage = UIImage(data: imageData) {
@@ -180,13 +232,11 @@ struct CameraView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
-        
         #if targetEnvironment(simulator)
             picker.sourceType = .photoLibrary
         #else
             picker.sourceType = .camera
         #endif
-        
         picker.delegate = context.coordinator
         return picker
     }
@@ -225,7 +275,6 @@ struct CameraView: UIViewControllerRepresentable {
 struct PromptInput: View {
     @State private var prompt: String = ""
     var mainViewModel: MainViewModel
-    
     var body: some View {
         HStack {
             TextField("Feel free to ask me more!", text: $prompt)
@@ -241,6 +290,7 @@ struct PromptInput: View {
             ActionButton(
                 text: "Go",
                 onClick: {
+                    // Todo: Mising permission
                     Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
                 },
                 isEnabled: !prompt.isEmpty,
@@ -253,10 +303,10 @@ struct PromptInput: View {
 }
 
 struct OutputSection: View {
-    var outputText: String
+    @ObservedObject var viewModel: MainViewModel
     var body: some View {
         VStack(alignment: .leading) {
-            Text(outputText)
+            Text(viewModel.outputText)
                 .font(.system(size: 18))
                 .foregroundColor(.black)
                 .padding()
