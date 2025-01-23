@@ -20,15 +20,14 @@ class LocationRepository: NSObject, CLLocationManagerDelegate {
         }
     }
 
-    // CLLocationManagerDelegate method - called when a new location is available
+    // CLLocationManagerDelegate interface methods
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         locationManager.stopUpdatingLocation()
         locationContinuation?.resume(returning: locations.last)
         locationContinuation = nil
     }
 
-    // Todo: Throw the printed errors.
-    // CLLocationManagerDelegate method - called when an error occurs
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let clError = error as? CLError {
             print("Error Code: \(clError.code.rawValue)")

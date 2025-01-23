@@ -168,7 +168,7 @@ struct ImageCarousel: View {
 struct ActionButton: View {
     var text: String
     var onClick: () -> Void
-    var buttonColor: Color = Color.green // adjust
+    var buttonColor: Color = Color.green
     var isEnabled: Bool = true
     var maxWidth: CGFloat = .infinity
     var body: some View {
@@ -250,9 +250,7 @@ struct CameraView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: CameraView
@@ -332,7 +330,7 @@ struct OutputSection: View {
                 .foregroundColor(.black)
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-//                .background(Color(UIColor.systemGray6))
+                .background(Color(UIColor.systemGray6))
                 .background(Color(UIColor.white))
                 .cornerRadius(12)
                 .padding(.horizontal, 16)
