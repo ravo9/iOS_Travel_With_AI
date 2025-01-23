@@ -79,7 +79,13 @@ struct MainScreenView: View {
                         })
                     }
                 )
-                OutputSection(viewModel: viewModel)
+                if viewModel.uiState == .loading {
+                    ProgressView("Loading...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .padding()
+                } else {
+                    OutputSection(viewModel: viewModel)
+                }
             }
             .background(Color.white)
             .edgesIgnoringSafeArea(.top)

@@ -107,7 +107,7 @@ class MainViewModel: ObservableObject {
     }
 }
 
-enum UiState {
+enum UiState: Equatable {
     case initial
     case loading
     case success(String)
