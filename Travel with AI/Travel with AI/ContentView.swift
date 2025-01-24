@@ -21,97 +21,112 @@ struct MainScreenView: View {
     private let permissionManager = PermissionManager()
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                ScreenTitle()
-                ImageCarousel(viewModel: viewModel)
-                ActionRow(buttons: [
-                    ("Let's start, tell me where I am", {
-                        requestPermission(for: .location, completion: {
-                            Task { await viewModel.sendPrompt(messageType: .initial) }
-                        })
-                    }, Color.green)
-                ])
-                ActionRow(buttons: [
-                    ("History of this place", {
-                        requestPermission(for: .location, completion: {
-                            Task { await viewModel.sendPrompt(messageType: .history) }
-                        })
-                    }, Color.green),
-                    ("Restaurants nearby", {
-                        requestPermission(for: .location, completion: {
-                            Task { await viewModel.sendPrompt(messageType: .restaurants) }
-                        })
-                    }, Color.green)
-                ])
-                ActionRow(buttons: [
-                    ("What attractions are worth-to-visit nearby", {
-                        requestPermission(for: .location, completion: {
-                            Task { await viewModel.sendPrompt(messageType: .touristSpots) }
-                        })
-                    }, Color.green)
-                ])
-                ActionRow(buttons: [
-                    ("What risks should I be aware of here?", {
-                        requestPermission(for: .location, completion: {
-                            Task { await viewModel.sendPrompt(messageType: .safety) }
-                        })
-                    }, firebrickRed)
-                ])
-                if let imageData = capturedImageData {
-                    ImagePreview(imageData: imageData)
-                        .transition(.opacity)
-                }
-                ActionRow(buttons: [
-                    ("Take a picture - I will tell you what it is!", {
-                        requestPermission(for: .location, completion: {
-                            requestPermission(for: .camera, completion: {
-                                showCamera = true
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 8) {
+                    ScreenTitle()
+                    ImageCarousel(viewModel: viewModel)
+                    ActionRow(buttons: [
+                        ("Let's start, tell me where I am", {
+                            requestPermission(for: .location, completion: {
+                                Task { await viewModel.sendPrompt(messageType: .initial) }
                             })
-                        })
-                    }, blue500)
-                ])
-                PromptInput(
-                    mainViewModel: viewModel,
-                    onClick: { action in
-                        requestPermission(for: .location, completion: {
-                            action()
-                        })
+                        }, Color.green)
+                    ]).id("LetsStart")
+                    ActionRow(buttons: [
+                        ("History of this place", {
+                            requestPermission(for: .location, completion: {
+                                Task { await viewModel.sendPrompt(messageType: .history) }
+                            })
+                        }, Color.green),
+                        ("Restaurants nearby", {
+                            requestPermission(for: .location, completion: {
+                                Task { await viewModel.sendPrompt(messageType: .restaurants) }
+                            })
+                        }, Color.green)
+                    ])
+                    ActionRow(buttons: [
+                        ("What attractions are worth-to-visit nearby", {
+                            requestPermission(for: .location, completion: {
+                                Task { await viewModel.sendPrompt(messageType: .touristSpots) }
+                            })
+                        }, Color.green)
+                    ])
+                    ActionRow(buttons: [
+                        ("What risks should I be aware of here?", {
+                            requestPermission(for: .location, completion: {
+                                Task { await viewModel.sendPrompt(messageType: .safety) }
+                            })
+                        }, firebrickRed)
+                    ])
+                    if let imageData = capturedImageData {
+                        ImagePreview(imageData: imageData)
+                            .transition(.opacity)
                     }
-                )
-                if viewModel.uiState == .loading {
-                    ProgressView("Loading...")
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .padding()
-                } else {
-                    OutputSection(viewModel: viewModel)
+                    ActionRow(buttons: [
+                        ("Take a picture - I will tell you what it is!", {
+                            requestPermission(for: .location, completion: {
+                                requestPermission(for: .camera, completion: {
+                                    showCamera = true
+                                })
+                            })
+                        }, blue500)
+                    ])
+                    PromptInput(
+                        mainViewModel: viewModel,
+                        onClick: { action in
+                            requestPermission(for: .location, completion: {
+                                action()
+                            })
+                        }
+                    )
+                    if viewModel.uiState == .loading {
+                        ProgressView("Loading...")
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .padding()
+                            .id("BOTTOM")
+                    } else {
+                        OutputSection(viewModel: viewModel)
+                    }
+                }
+                .background(Color.white)
+                .edgesIgnoringSafeArea(.top)
+            }
+            .sheet(isPresented: $showCamera) {
+                CameraView(imageData: $capturedImageData)
+            }
+            .onChange(of: capturedImageData) { newValue in
+                handleImageChange(newValue)
+            }
+            .onChange(of: viewModel.uiState) { newState in
+                if newState == .loading {
+                    withAnimation {
+                        proxy.scrollTo("BOTTOM", anchor: .bottom)
+                    }
+                }
+                if case .success(_) = newState {
+                    withAnimation {
+                        proxy.scrollTo("LetsStart", anchor: .top)
+                    }
                 }
             }
-            .background(Color.white)
-            .edgesIgnoringSafeArea(.top)
-        }
-        .sheet(isPresented: $showCamera) {
-            CameraView(imageData: $capturedImageData)
-        }
-        .onChange(of: capturedImageData) { newValue in
-            handleImageChange(newValue)
-        }
-        .alert(isPresented: Binding<Bool>(
-            get: { permissionErrorMessage != nil },
-            set: { if !$0 { permissionErrorMessage = nil } }
-        )) {
-            Alert(
-                title: Text("Permission Required"),
-                message: Text(permissionErrorMessage ?? ""),
-                primaryButton: .default(Text("Go to Settings")) {
-                    if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(settingsURL)
+            .alert(isPresented: Binding<Bool>(
+                get: { permissionErrorMessage != nil },
+                set: { if !$0 { permissionErrorMessage = nil } }
+            )) {
+                Alert(
+                    title: Text("Permission Required"),
+                    message: Text(permissionErrorMessage ?? ""),
+                    primaryButton: .default(Text("Go to Settings")) {
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsURL)
+                        }
+                    },
+                    secondaryButton: .cancel {
+                        permissionErrorMessage = nil
                     }
-                },
-                secondaryButton: .cancel {
-                    permissionErrorMessage = nil
-                }
-            )
+                )
+            }
         }
     }
     
