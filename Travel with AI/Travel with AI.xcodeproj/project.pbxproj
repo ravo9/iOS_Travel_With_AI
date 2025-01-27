@@ -313,7 +313,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is required to allow the AI to view your surroundings and provide explanations based on what it sees.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized AI service.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The app requires access to your location to provide tailored and context-specific responses about the place you are visiting. By using your location, the app delivers accurate and relevant information about the history, culture, and environment of your current destination. Without this, we wouldn’t be able to offer personalized insights specific to the place you're exploring, which is essential for the app’s functionality.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -349,7 +349,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is required to allow the AI to view your surroundings and provide explanations based on what it sees.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide personalized AI service.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The app requires access to your location to provide tailored and context-specific responses about the place you are visiting. By using your location, the app delivers accurate and relevant information about the history, culture, and environment of your current destination. Without this, we wouldn’t be able to offer personalized insights specific to the place you're exploring, which is essential for the app’s functionality.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
