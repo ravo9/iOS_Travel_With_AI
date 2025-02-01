@@ -33,7 +33,7 @@ class PurchaseManager: NSObject, ObservableObject {
 
     func checkSubscriptionStatus() {
         // Add receipt validation here or mock subscription status for now
-        isSubscribed = false // Mock status for demonstration
+        isSubscribed = true // Mock status for demonstration
     }
 
     private func showError(message: String) {

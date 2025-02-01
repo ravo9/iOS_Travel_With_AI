@@ -13,10 +13,10 @@ let firebrickRed = Color(red: 0xDB/255.0, green: 0x57/255.0, blue: 0x57/255.0)
 
 struct MainScreenView: View {
     @StateObject private var viewModel = MainViewModel()
-    @State private var outputText: String = "(My answers will appear here)"
     @State private var showCamera = false
     @State private var capturedImageData: Data?
     @State private var permissionErrorMessage: String?
+    @State private var locationInput: String = ""
 
     private let permissionManager = PermissionManager()
     
@@ -29,37 +29,64 @@ struct MainScreenView: View {
                     VStack(spacing: 8) {
                         ScreenTitle()
                         ImageCarousel(viewModel: viewModel)
+                        LocationView(location: viewModel.locationText, locationInput: locationInput)
+                            .onAppear{
+                                requestPermission(for: .location, completion: {
+                                    Task { do { try await viewModel.fetchCurrentLocation() } }
+                                })
+                            }
+                        LocationInput(locationInputState: $locationInput)
                         ActionRow(buttons: [
                             ("Let's start, tell me where I am", {
-                                requestPermission(for: .location, completion: {
-                                    Task { await viewModel.sendPrompt(messageType: .initial) }
-                                })
+                                if (!locationInput.isEmpty) {
+                                    Task { await viewModel.sendPrompt(messageType: .initial, locationInput: locationInput) }
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        Task { await viewModel.sendPrompt(messageType: .initial) }
+                                    })
+                                }
                             }, Color.green)
                         ]).id("LetsStart")
                         ActionRow(buttons: [
                             ("History of this place", {
-                                requestPermission(for: .location, completion: {
-                                    Task { await viewModel.sendPrompt(messageType: .history) }
-                                })
+                                if (!locationInput.isEmpty) {
+                                    Task { await viewModel.sendPrompt(messageType: .history, locationInput: locationInput) }
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        Task { await viewModel.sendPrompt(messageType: .history) }
+                                    })
+                                }
                             }, Color.green),
                             ("Restaurants nearby", {
-                                requestPermission(for: .location, completion: {
-                                    Task { await viewModel.sendPrompt(messageType: .restaurants) }
-                                })
+                                if (!locationInput.isEmpty) {
+                                    Task { await viewModel.sendPrompt(messageType: .restaurants, locationInput: locationInput) }
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        Task { await viewModel.sendPrompt(messageType: .restaurants) }
+                                    })
+                                }
                             }, Color.green)
                         ])
                         ActionRow(buttons: [
                             ("What attractions are worth-to-visit nearby", {
-                                requestPermission(for: .location, completion: {
-                                    Task { await viewModel.sendPrompt(messageType: .touristSpots) }
-                                })
+                                if (!locationInput.isEmpty) {
+                                    Task { await viewModel.sendPrompt(messageType: .touristSpots, locationInput: locationInput) }
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        Task { await viewModel.sendPrompt(messageType: .touristSpots) }
+                                    })
+                                }
                             }, Color.green)
                         ])
                         ActionRow(buttons: [
                             ("What risks should I be aware of here?", {
-                                requestPermission(for: .location, completion: {
-                                    Task { await viewModel.sendPrompt(messageType: .safety) }
-                                })
+                                if (!locationInput.isEmpty) {
+                                    Task { await viewModel.sendPrompt(messageType: .safety, locationInput: locationInput) }
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        Task { await viewModel.sendPrompt(messageType: .safety) }
+                                    })
+                                }
                             }, firebrickRed)
                         ])
                         if let imageData = capturedImageData {
@@ -68,19 +95,31 @@ struct MainScreenView: View {
                         }
                         ActionRow(buttons: [
                             ("Take a picture - I will tell you what it is!", {
-                                requestPermission(for: .location, completion: {
+                                if (!locationInput.isEmpty) {
                                     requestPermission(for: .camera, completion: {
                                         showCamera = true
                                     })
-                                })
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        requestPermission(for: .camera, completion: {
+                                            showCamera = true
+                                        })
+                                    })
+                                }
                             }, blue500)
                         ])
                         PromptInput(
+                            locationInput: locationInput,
                             mainViewModel: viewModel,
                             onClick: { action in
-                                requestPermission(for: .location, completion: {
+                                // Todo
+                                if (!locationInput.isEmpty) {
                                     action()
-                                })
+                                } else {
+                                    requestPermission(for: .location, completion: {
+                                        action()
+                                    })
+                                }
                             }
                         )
                         if viewModel.uiState == .loading {
@@ -103,14 +142,10 @@ struct MainScreenView: View {
                 }
                 .onChange(of: viewModel.uiState) { newState in
                     if newState == .loading {
-                        withAnimation {
-                            proxy.scrollTo("BOTTOM", anchor: .bottom)
-                        }
+                        withAnimation { proxy.scrollTo("BOTTOM", anchor: .bottom) }
                     }
                     if case .success(_) = newState {
-                        withAnimation {
-                            proxy.scrollTo("LetsStart", anchor: .top)
-                        }
+                        withAnimation { proxy.scrollTo("LetsStart", anchor: .top) }
                     }
                 }
                 .alert(isPresented: Binding<Bool>(
@@ -145,14 +180,22 @@ struct MainScreenView: View {
             if granted {
                 completion()
             } else {
-                permissionErrorMessage = "Permission denied for \(type). Please enable it in Settings."
+                let errorMessage = "Permission denied for \(type). Please enable it in Settings."
+                permissionErrorMessage = errorMessage
+                if (type == PermissionType.location) {
+                    viewModel.userDeniedLocation(errorMessage: errorMessage)
+                }
             }
         }
     }
 
     private func handleImageChange(_ newValue: Data?) {
         if let imageData = newValue {
-            Task { await viewModel.sendPrompt(messageType: .photo, photo: imageData) }
+            if (!locationInput.isEmpty) {
+                Task { await viewModel.sendPrompt(messageType: .photo, photo: imageData, locationInput: locationInput) }
+            } else {
+                Task { await viewModel.sendPrompt(messageType: .photo, photo: imageData) }
+            }
         }
     }
 }
@@ -195,6 +238,60 @@ struct ImageCarousel: View {
         }
     }
 }
+
+struct LocationView: View {
+    var location: String
+    var locationInput: String
+    var body: some View {
+        let textColor: Color = locationInput.isEmpty ? Color.primary : Color.gray
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Your Location:")
+                .font(.body)
+                .foregroundColor(textColor)
+            Text(location)
+                .font(.subheadline)
+                .foregroundColor(textColor)
+        }
+        .multilineTextAlignment(.leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 16)
+        .padding(.horizontal, 32)
+    }
+}
+
+struct LocationInput: View {
+    @Binding var locationInputState: String
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("You can also provide another location:")
+                .font(.body)
+                .foregroundColor(Color.primary)
+                .padding(.horizontal, 12)
+            HStack {
+                TextField("e.g. 'Rome, Italy' or 'London, Piccadilly'", text: $locationInputState)
+                    .padding(20)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(locationInputState.isEmpty ? Color.gray : Color.green, lineWidth: 1)
+                    )
+                if !locationInputState.isEmpty {
+                    Button(action: {
+                        // Hide keyboard when clicked
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .padding(.trailing, 10)
+                    }
+                }
+            }
+        }
+        .padding(20)
+    }
+}
+
 
 struct ActionButton: View {
     var text: String
@@ -315,6 +412,7 @@ struct CameraView: UIViewControllerRepresentable {
 
 struct PromptInput: View {
     @State private var prompt: String = ""
+    var locationInput: String
     var mainViewModel: MainViewModel
     var onClick: ((@escaping () -> Void) -> Void)?
     var body: some View {
@@ -331,7 +429,11 @@ struct PromptInput: View {
                 .onSubmit {
                     onClick?({
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                        if (!locationInput.isEmpty) {
+                            Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt, locationInput: locationInput) }
+                        } else {
+                            Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                        }
                     })
                 }
 
@@ -340,7 +442,11 @@ struct PromptInput: View {
                 onClick: {
                     onClick?({
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                        if (!locationInput.isEmpty) {
+                            Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt, locationInput: locationInput) }
+                        } else {
+                            Task { await mainViewModel.sendPrompt(messageType: .custom, prompt: prompt) }
+                        }
                     })
                 },
                 isEnabled: !prompt.isEmpty,
@@ -378,7 +484,6 @@ struct SubscriptionView: View {
             Text("Unlock full access with a subscription!")
                 .font(.title)
                 .padding()
-
             Button(action: {
                 purchaseManager.purchaseSubscription()
             }) {
@@ -390,14 +495,10 @@ struct SubscriptionView: View {
                     .cornerRadius(10)
             }
             .padding()
-
-            if purchaseManager.isSubscribed {
-                Text("You are subscribed!")
-                    .foregroundColor(.green)
-            }
+            if purchaseManager.isSubscribed { Text("You are subscribed!").foregroundColor(.green) }
         }
         .onAppear {
-            purchaseManager.fetchProducts()
+//            purchaseManager.fetchProducts()
             purchaseManager.checkSubscriptionStatus()
         }
     }

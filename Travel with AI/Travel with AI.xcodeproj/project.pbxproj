@@ -77,10 +77,10 @@
 				998906BF2D354D5500E0A4B4 /* LocationRepository.swift */,
 				998906AD2D34DC1E00E0A4B4 /* GenerativeModelRepository.swift */,
 				99490FC82D40FC0F0030208E /* PermissionManager.swift */,
+				9964B4CD2D489DFF001887F4 /* PurchaseManager.swift */,
 				998906972D33F54900E0A4B4 /* Assets.xcassets */,
 				998906BD2D350FFF00E0A4B4 /* GoogleService-Info.plist */,
 				998906992D33F54900E0A4B4 /* Preview Content */,
-				9964B4CD2D489DFF001887F4 /* PurchaseManager.swift */,
 			);
 			path = "Travel with AI";
 			sourceTree = "<group>";

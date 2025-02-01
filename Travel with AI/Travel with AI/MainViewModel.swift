@@ -18,6 +18,7 @@ class MainViewModel: ObservableObject {
     private var generativeModel = GenerativeModelRepository()
     
     @Published var uiState: UiState = .initial
+    var locationText: String = "Looking for your physical location by GPS..."
     var outputText: String {
             switch uiState {
             case .initial:
@@ -52,17 +53,20 @@ class MainViewModel: ObservableObject {
         return imagesRepository.getAIGeneratedImages()
     }
     
-    func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: Data? = nil) async {
+    func sendPrompt(messageType: MessageType, prompt: String? = nil, photo: Data? = nil, locationInput: String? = nil) async {
         uiState = .loading
         do {
-            guard let location = try await fetchCurrentLocation() else {
-                uiState = .error("Location not available")
-                return
+            let location: String
+            if let locationInput = locationInput {
+                location = locationInput
+            } else {
+                guard let fetchedLocation = try await fetchCurrentLocation() else {
+                    uiState = .error("Location not available")
+                    return
+                }
+                location = getLocationString(location: fetchedLocation)
             }
-            guard let enhancedPrompt = enhancePrompt(messageType: messageType, location: location, prompt: prompt) else {
-                uiState = .error("Failed to enhance the prompt.")
-                return
-            }
+            let enhancedPrompt = messageType.getMessage(location: location, prompt: prompt ?? "")
             guard let response = try await generateResponse(
                 for: enhancedPrompt,
                 photo: photo
@@ -76,15 +80,23 @@ class MainViewModel: ObservableObject {
         }
     }
 
-    private func fetchCurrentLocation() async throws -> CLLocation? {
+    func fetchCurrentLocation() async throws -> CLLocation? {
         do {
             if let location = try await locationRepository.getCurrentLocation() {
+                
+                // Temporary
+                self.locationText = toDetailedString(location: location)
+                
                 return CLLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
             }
             return nil
         } catch {
             return nil
         }
+    }
+    
+    func userDeniedLocation(errorMessage: String) {
+        self.locationText = errorMessage
     }
 
     private func generateResponse(for prompt: String, photo: Data?) async throws -> String? {
@@ -101,9 +113,21 @@ class MainViewModel: ObservableObject {
     private func cleanResponseText(_ text: String) -> String {
         return text.replacingOccurrences(of: "**", with: "")
     }
+    
+    func toDetailedString(location: CLLocation) -> String {
+        var details = "• Latitude: \(String(format: "%.4f", location.coordinate.latitude))\n"
+        details += "• Longitude: \(String(format: "%.4f", location.coordinate.longitude))\n"
+        if location.altitude != 0 {
+            details += "• Altitude: \(String(format: "%.2f", location.altitude)) meters\n"
+        }
+        if location.horizontalAccuracy >= 0 {
+            details += "• Accuracy: \(String(format: "%.2f", location.horizontalAccuracy)) meters"
+        }
+        return details
+    }
 
-    private func enhancePrompt(messageType: MessageType, location: CLLocation, prompt: String?) -> String? {
-        return messageType.getMessage(location: location, prompt: prompt ?? "")
+    func getLocationString(location: CLLocation) -> String {
+        return "Latitude: \(location.coordinate.latitude), Longitude: \(location.coordinate.longitude)."
     }
 }
 
@@ -126,27 +150,25 @@ enum MessageType {
     var template: String {
         switch self {
         case .initial:
-            return "Tell me interesting things about this location: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide. Tell me about history, tourist spots, restaurants, etc."
+            return "Tell me interesting things about this location: {location} Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide. Tell me about history, tourist spots, restaurants, etc."
         case .history:
-            return "Tell me about history of this location: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
+            return "Tell me about history of this location: {location} Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
         case .restaurants:
-            return "Tell me about restaurants and interesting food spots in a walking distance from this location: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me. Mention restaurants' names!"
+            return "Tell me about restaurants and interesting food spots in a walking distance from this location: {location} Do not mention these values in response. Don't confirm you understand me. Mention restaurants' names!"
         case .touristSpots:
-            return "Tell me about 5-6 most famous and important tourist spots/ attractions around this location that are worth to visit: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
+            return "Tell me about 5-6 most famous and important tourist spots/ attractions around this location that are worth to visit: {location} Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
         case .safety:
-            return "Tell me about risks I should be careful on, and behaviours I should avoid as a tourist to stay safe in this location. Be specific. You can tell me also what behaviours should I avoid not to offend locals. Refer to this place specifically: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
+            return "Tell me about risks I should be careful on, and behaviours I should avoid as a tourist to stay safe in this location. Be specific. You can tell me also what behaviours should I avoid not to offend locals. Refer to this place specifically: {location} Do not mention these values in response. Don't confirm you understand me. Behave like a tourist guide."
         case .custom:
-            return "{prompt}. Please answer in relation to the place: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me."
+            return "{prompt}. Please answer in relation to the place: {location} Do not mention these values in response. Don't confirm you understand me."
         case .photo:
-            return "{prompt}. Please tell me what is in the picture. Please answer in relation to the place: Latitude: {latitude}, Longitude: {longitude}. Do not mention these values in response. Don't confirm you understand me."
+            return "{prompt}. Please tell me what is in the picture. Please answer in relation to the place: {location} Do not mention these values in response. Don't confirm you understand me."
         }
     }
 
-    func getMessage(location: CLLocation, prompt: String = "") -> String {
-        var message = template
-        message = message.replacingOccurrences(of: "{latitude}", with: String(location.coordinate.latitude))
-        message = message.replacingOccurrences(of: "{longitude}", with: String(location.coordinate.longitude))
-        message = message.replacingOccurrences(of: "{prompt}", with: prompt)
-        return message
+    func getMessage(location: String, prompt: String = "") -> String {
+        return template
+            .replacingOccurrences(of: "{location}", with: location)
+            .replacingOccurrences(of: "{prompt}", with: prompt)
     }
 }
