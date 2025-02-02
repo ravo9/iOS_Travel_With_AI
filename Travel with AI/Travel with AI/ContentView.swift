@@ -479,7 +479,7 @@ struct OutputSection: View {
 
 struct SubscriptionView: View {
     @ObservedObject private var purchaseManager = PurchaseManager.shared
-    @State private var isPurchasing = false  // Local state for loading
+    @State private var isPurchasing = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -491,14 +491,14 @@ struct SubscriptionView: View {
 
             if let product = purchaseManager.product {
                 Button(action: {
-                    isPurchasing = true  // Start loading
+                    isPurchasing = true
                     Task {
                         await purchaseManager.purchaseSubscription()
-                        isPurchasing = false  // Stop loading after purchase completes
+                        isPurchasing = false
                     }
                 }) {
                     if isPurchasing {
-                        ProgressView()  // Show loading spinner
+                        ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -512,7 +512,13 @@ struct SubscriptionView: View {
                 .background(Color.blue)
                 .cornerRadius(10)
                 .padding(.horizontal)
-                .disabled(isPurchasing)  // Disable button during purchase
+                .disabled(isPurchasing)
+                
+                Text("Already subscribed? Tap the button to restore your subscription.")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             } else {
                 ProgressView("Loading subscription...")
                     .padding()
