@@ -180,11 +180,12 @@ struct MainScreenView: View {
             if granted {
                 completion()
             } else {
-                let errorMessage = "Permission denied for \(type). Please enable it in Settings."
-                permissionErrorMessage = errorMessage
+                var errorMessage = "Permission denied for \(type). Please enable it in Settings."
                 if (type == PermissionType.location) {
+                    errorMessage = "Permission denied for \(type). Please enable it in Settings or provide the location manually."
                     viewModel.userDeniedLocation(errorMessage: errorMessage)
                 }
+                permissionErrorMessage = errorMessage
             }
         }
     }
