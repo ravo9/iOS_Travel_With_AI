@@ -480,29 +480,42 @@ struct SubscriptionView: View {
     @ObservedObject private var purchaseManager = PurchaseManager.shared
 
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Text("Unlock full access with a subscription!")
-                .font(.title)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
                 .padding()
-            Button(action: {
-                purchaseManager.purchaseSubscription()
-            }) {
-                Text("Subscribe for $1.99/month")
-                    .foregroundColor(.white)
+
+            if let product = purchaseManager.product {
+                Button(action: {
+                    Task {
+                        await purchaseManager.purchaseSubscription()
+                    }
+                }) {
+                    Text("Subscribe for \(product.displayPrice)/month")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+            } else {
+                ProgressView("Loading subscription...")
                     .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(10)
             }
-            .padding()
-            if purchaseManager.isSubscribed { Text("You are subscribed!").foregroundColor(.green) }
+
+            if purchaseManager.isSubscribed {
+                Text("You are subscribed!")
+                    .foregroundColor(.green)
+                    .fontWeight(.bold)
+            }
         }
-        .onAppear {
-//            purchaseManager.fetchProducts()
-            purchaseManager.checkSubscriptionStatus()
-        }
+        .padding()
     }
 }
+
 
 #Preview {
     MainScreenView()

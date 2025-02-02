@@ -1,81 +1,91 @@
-import UIKit
 import StoreKit
+import SwiftUI
 
-class PurchaseManager: NSObject, ObservableObject {
+@MainActor
+class PurchaseManager: ObservableObject {
     static let shared = PurchaseManager()
     @Published var isSubscribed: Bool = false
 
-    private var product: SKProduct?
+    var product: Product?
+    private let productID = "TravelWithAIMonthlyAccess"
 
-    override init() {
-        super.init()
-        SKPaymentQueue.default().add(self) // Add observer to the payment queue
+    init() {
+        Task {
+            await fetchProducts()
+            await checkSubscriptionStatus()
+        }
     }
 
-    deinit {
-        SKPaymentQueue.default().remove(self) // Remove observer to prevent memory leaks
+    // MARK: - Fetch Products
+    func fetchProducts() async {
+        do {
+            let products = try await Product.products(for: [productID])
+            if let fetchedProduct = products.first {
+                self.product = fetchedProduct
+                print("Product fetched: \(fetchedProduct.displayName)")
+            } else {
+                showError(message: "No products found.")
+            }
+        } catch {
+            showError(message: "Failed to fetch products: \(error.localizedDescription)")
+        }
     }
 
-    func fetchProducts() {
-        let request = SKProductsRequest(productIdentifiers: ["TravelWithAIMonthlyAccess"])
-        request.delegate = self
-        request.start()
-    }
-
-    func purchaseSubscription() {
+    // MARK: - Purchase Subscription
+    func purchaseSubscription() async {
         guard let product = product else {
             showError(message: "Product not found.")
             return
         }
-        let payment = SKPayment(product: product)
-        SKPaymentQueue.default().add(payment)
+
+        do {
+            let result = try await product.purchase()
+            switch result {
+            case .success(let verification):
+                switch verification {
+                case .verified(let transaction):
+                    await updateSubscriptionStatus()
+                    await transaction.finish()
+                case .unverified(_, let error):
+                    showError(message: "Purchase verification failed: \(error.localizedDescription)")
+                }
+            case .userCancelled:
+                print("User cancelled the purchase.")
+            case .pending:
+                showError(message: "Purchase is pending approval.")
+            @unknown default:
+                showError(message: "Unknown purchase result.")
+            }
+        } catch {
+            showError(message: "Purchase failed: \(error.localizedDescription)")
+        }
     }
 
-    func checkSubscriptionStatus() {
-        // Add receipt validation here or mock subscription status for now
-        isSubscribed = true // Mock status for demonstration
+    // MARK: - Check Subscription Status
+    func checkSubscriptionStatus() async {
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result,
+               transaction.productID == productID,
+               transaction.revocationDate == nil {
+                isSubscribed = true
+                return
+            }
+        }
+        isSubscribed = false
     }
 
+    private func updateSubscriptionStatus() async {
+        await checkSubscriptionStatus()
+    }
+
+    // MARK: - Show Error
     private func showError(message: String) {
-        // Ensure that the alert is presented on the main thread
         DispatchQueue.main.async {
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootViewController = scene.windows.first?.rootViewController {
                 let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 rootViewController.present(alert, animated: true, completion: nil)
-            }
-        }
-    }
-}
-
-extension PurchaseManager: SKProductsRequestDelegate {
-    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-        if response.products.isEmpty {
-            showError(message: "No products found.")
-        } else {
-            if let fetchedProduct = response.products.first {
-                self.product = fetchedProduct
-            }
-        }
-    }
-}
-
-extension PurchaseManager: SKPaymentTransactionObserver {
-    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        for transaction in transactions {
-            switch transaction.transactionState {
-            case .purchased, .restored:
-                SKPaymentQueue.default().finishTransaction(transaction)
-                isSubscribed = true
-            case .failed:
-                SKPaymentQueue.default().finishTransaction(transaction)
-                if let error = transaction.error as? SKError {
-                    showError(message: error.localizedDescription)
-                } else {
-                    showError(message: "Transaction failed.")
-                }
-            default:
-                break
             }
         }
     }

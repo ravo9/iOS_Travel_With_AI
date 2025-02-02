@@ -18,7 +18,7 @@ class MainViewModel: ObservableObject {
     private var generativeModel = GenerativeModelRepository()
     
     @Published var uiState: UiState = .initial
-    var locationText: String = "Looking for your physical location by GPS..."
+    @Published var locationText: String = "Looking for your physical location by GPS..."
     var outputText: String {
             switch uiState {
             case .initial:
