@@ -389,11 +389,12 @@ struct CameraView: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.originalImage] as? UIImage {
-                
+
                 // For screenshots
 //                let imageCompressed = UIImage(named: "london")?
+//                let imageCompressed = UIImage(named: "bangkok")?
 //                    .jpegData(compressionQuality: 0.8)
-                
+
                 let imageCompressed = image.jpegData(compressionQuality: 0.8)
                 DispatchQueue.main.async {
                     if let imageCompressed = imageCompressed {
