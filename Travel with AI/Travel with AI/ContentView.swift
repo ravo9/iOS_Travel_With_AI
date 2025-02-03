@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Travel with AI
-//
-//  Created by Rafal Ozog on 12/01/2025.
-//
-
 import SwiftUI
 import AVFoundation
 
@@ -17,10 +10,10 @@ struct MainScreenView: View {
     @State private var capturedImageData: Data?
     @State private var permissionErrorMessage: String?
     @State private var locationInput: String = ""
-
     private let permissionManager = PermissionManager()
-    
     @ObservedObject private var purchaseManager = PurchaseManager.shared
+    
+    // MARK: - Use it to separate concerns
 
     var body: some View {
         if purchaseManager.isSubscribed {
@@ -293,7 +286,6 @@ struct LocationInput: View {
     }
 }
 
-
 struct ActionButton: View {
     var text: String
     var onClick: () -> Void
@@ -383,9 +375,7 @@ struct CameraView: UIViewControllerRepresentable {
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: CameraView
-        init(_ parent: CameraView) {
-            self.parent = parent
-        }
+        init(_ parent: CameraView) { self.parent = parent }
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.originalImage] as? UIImage {

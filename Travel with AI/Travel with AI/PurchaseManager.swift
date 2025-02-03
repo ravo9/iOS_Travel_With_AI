@@ -16,7 +16,6 @@ class PurchaseManager: ObservableObject {
         }
     }
 
-    // MARK: - Fetch Products
     func fetchProducts() async {
         do {
             let products = try await Product.products(for: [productID])
@@ -31,7 +30,6 @@ class PurchaseManager: ObservableObject {
         }
     }
 
-    // MARK: - Purchase Subscription
     func purchaseSubscription() async {
         guard let product = product else {
             showError(message: "Product not found.")
@@ -61,7 +59,6 @@ class PurchaseManager: ObservableObject {
         }
     }
 
-    // MARK: - Check Subscription Status
     func checkSubscriptionStatus() async {
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result,
@@ -78,7 +75,6 @@ class PurchaseManager: ObservableObject {
         await checkSubscriptionStatus()
     }
 
-    // MARK: - Show Error
     private func showError(message: String) {
         DispatchQueue.main.async {
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
