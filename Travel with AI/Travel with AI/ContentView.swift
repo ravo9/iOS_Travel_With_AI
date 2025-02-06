@@ -481,6 +481,13 @@ struct SubscriptionView: View {
                 .padding()
 
             if let product = purchaseManager.product {
+
+                if isPurchasing {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .frame(maxWidth: .infinity)
+                }
+
                 Button(action: {
                     isPurchasing = true
                     Task {
@@ -488,28 +495,40 @@ struct SubscriptionView: View {
                         isPurchasing = false
                     }
                 }) {
-                    if isPurchasing {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        Text("Subscribe for \(product.displayPrice)/month")
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
+                    Text("Subscribe for \(product.displayPrice)/month")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                }
+                .background(Color.blue)
+                .cornerRadius(10)
+                .padding(.horizontal)
+                .padding(.top)
+                .disabled(isPurchasing)
+                
+                Button(action: {
+                    isPurchasing = true
+                    Task {
+                        await purchaseManager.purchaseSubscription()
+                        isPurchasing = false
                     }
+                }) {
+                    Text("Restore your subscription")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
                 }
                 .background(Color.blue)
                 .cornerRadius(10)
                 .padding(.horizontal)
                 .disabled(isPurchasing)
-                
+
                 Text("Already subscribed? Tap the button to restore your subscription.")
                     .font(.footnote)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+
             } else {
                 ProgressView("Loading subscription...")
                     .padding()

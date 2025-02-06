@@ -68,6 +68,7 @@ class PurchaseManager: ObservableObject {
                 return
             }
         }
+        // Todo/ bug: Sometimes it jumps straight to next line in this function.
         isSubscribed = false
     }
 
