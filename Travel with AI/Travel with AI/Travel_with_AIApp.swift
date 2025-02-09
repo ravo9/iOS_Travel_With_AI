@@ -7,17 +7,28 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAnalytics
 
 @main
 struct Travel_with_AIApp: App {
 
-    init() {
-        FirebaseApp.configure()
-    }
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate // Firebase
 
     var body: some Scene {
         WindowGroup {
             MainScreenView()
         }
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        FirebaseApp.configure()
+        Analytics.logEvent("ios_app_open", parameters: nil) // Firebase somehow needs it to kick off Analytics
+        return true
     }
 }

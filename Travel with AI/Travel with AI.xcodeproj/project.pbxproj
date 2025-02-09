@@ -20,6 +20,7 @@
 		998906B32D350ABF00E0A4B4 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 998906B22D350ABF00E0A4B4 /* FirebaseRemoteConfig */; };
 		998906BE2D350FFF00E0A4B4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 998906BD2D350FFF00E0A4B4 /* GoogleService-Info.plist */; };
 		998906C02D354D5500E0A4B4 /* LocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998906BF2D354D5500E0A4B4 /* LocationRepository.swift */; };
+		99E9F7332D58649300F345C3 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 99E9F7322D58649300F345C3 /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99E9F7332D58649300F345C3 /* FirebaseAnalytics in Frameworks */,
 				998906B32D350ABF00E0A4B4 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,6 +113,7 @@
 			name = "Travel with AI";
 			packageProductDependencies = (
 				998906B22D350ABF00E0A4B4 /* FirebaseRemoteConfig */,
+				99E9F7322D58649300F345C3 /* FirebaseAnalytics */,
 			);
 			productName = "Travel with AI";
 			productReference = 998906902D33F54800E0A4B4 /* Travel with AI.app */;
@@ -415,6 +418,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 998906B12D350ABF00E0A4B4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseRemoteConfig;
+		};
+		99E9F7322D58649300F345C3 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 998906B12D350ABF00E0A4B4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
